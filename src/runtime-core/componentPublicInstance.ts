@@ -1,4 +1,4 @@
-import { hasOwn } from "../reactivity/share/index"
+import { hasOwn } from "../share/index"
 
 const publicPropertiesMap = {
     $el: i => i.vnode.el,

@@ -1,4 +1,4 @@
-import { isObject } from "../reactivity/share/index"
+import { isObject } from "../share/index"
 import { ShapeFlags } from "./shapFlags"
 
 export function createVNode(type, props?, children?) {

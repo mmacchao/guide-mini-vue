@@ -1,4 +1,4 @@
-import { isObject } from "../reactivity/share/index"
+import { isObject } from "../share/index"
 import { createComponentInstance, setupComponent } from "./component"
 import { ShapeFlags } from "./shapFlags"
 
