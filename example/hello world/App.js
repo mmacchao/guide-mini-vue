@@ -16,7 +16,7 @@ export const App = {
             },
             // [h('p', {class: ['red']}, 'hi,'), h('p', {class: ['blue']},  'min vue')]
             [
-                h('p', {}, 'hi, ' + this.msg,),
+                h('p', {}, 'App'),
                 h(Foo,
                     {
                         count: 1,
@@ -28,7 +28,7 @@ export const App = {
                         }
                     },
                     {
-                        header: props => h('div', {}, 'age: ' + props.age)
+                        header: props => h('p', {}, 'age: ' + props.age)
                     })
             ]
         )

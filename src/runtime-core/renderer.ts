@@ -1,49 +1,68 @@
 import { isObject } from "../share/index"
 import { createComponentInstance, setupComponent } from "./component"
 import { ShapeFlags } from "./shapFlags"
+import { Fragment, Text } from "./vnode"
 
 export function render(vnode, container) {
     patch(vnode, container)
 }
 
 export function patch(vnode, container) {
-    if (vnode.shapFlag & ShapeFlags.ELEMENT) {
-        processElement(vnode, container)
-    } else if (vnode.shapFlag & ShapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
+    switch (vnode.type) {
+        case Fragment:
+            processFragment(vnode, container)
+            break
+        case Text:
+            processText(vnode, container)
+            break
+        default:
+            if (vnode.shapFlag & ShapeFlags.ELEMENT) {
+                processElement(vnode, container)
+            } else if (vnode.shapFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
     }
+
+
 
 }
 
 function processElement(vnode, container) {
-   mountElement(vnode, container)
+    mountElement(vnode, container)
+}
 
+function processFragment(vnode, container) {
+    patchChildren(vnode.children, container)
+}
+function processText(vnode, container) {
+    const el = vnode.el = document.createTextNode(vnode.children)
+    container.append(el)
 }
 
 function mountElement(vnode, container) {
-    const el = document.createElement(vnode.type)
+    const el = vnode.el = document.createElement(vnode.type)
 
     vnode.el = el
 
     // handle children
-    if(vnode.shapFlag & ShapeFlags.TEXT_CHILDREN) {
+    if (vnode.shapFlag & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = vnode.children
-    } else if(vnode.shapFlag & ShapeFlags.ARRAY_CHILDREN) {
-       patchChildren(vnode.children, el)
+    } else if (vnode.shapFlag & ShapeFlags.ARRAY_CHILDREN) {
+        patchChildren(vnode.children, el)
     }
 
     // handle props
-    for(let key in vnode.props) {
+    for (let key in vnode.props) {
         const val = vnode.props[key]
         // handle event
         const isOn = key => /^on[A-Z]/.test(key)
-        if(isOn(key)) {
+        if (isOn(key)) {
             const event = key.slice(2).toLowerCase()
             el.addEventListener(event, val)
         } else {
             el.setAttribute(key, val)
         }
-        
+
     }
 
     container.append(el)
@@ -70,7 +89,7 @@ function setupRenderEffect(instance, vnode, container) {
     const subTree = instance.render.call(instance.proxy)
 
     patch(subTree, container)
-    
+
     // 组件的el要挂载子元素的根el
     vnode.el = subTree.el
 }

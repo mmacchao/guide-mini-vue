@@ -1,4 +1,4 @@
-import { h, renderSlots } from "../../lib/guide-mini-vue.esm.js"
+import { h, renderSlots, createTextVnode } from "../../lib/guide-mini-vue.esm.js"
 
 export const Foo = {
     name: 'Foo',
@@ -18,6 +18,7 @@ export const Foo = {
         return h('p', {},
             [
                 slotVnode,
+                createTextVnode('我是text节点'),
                 h('p', {}, 'hi:' + this.count),
             ])
     }

@@ -28,3 +28,10 @@ export function createVNode(type, props?, children?) {
 function getShapFlag(type) {
     return typeof type === 'string' ? ShapeFlags.ELEMENT : ShapeFlags.STATEFUL_COMPONENT 
 }
+
+export const Fragment = Symbol('Fragment')
+export const Text = Symbol('Text')
+
+export function createTextVnode(text) {
+    return createVNode(Text, {}, text)
+}
