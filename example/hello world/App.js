@@ -13,7 +13,16 @@ export const App = {
                 }
             },
             // [h('p', {class: ['red']}, 'hi,'), h('p', {class: ['blue']},  'min vue')]
-            ['hi, ' + this.msg, h(Foo, {count: 1})]
+            ['hi, ' + this.msg,
+            h(Foo, {
+                count: 1, 
+                onAdd(a, b) {
+                    console.log('onAdd', a, b)
+                },
+                onAddFoo() {
+                    console.log('onAddFoo')
+                }
+            })]
         )
     },
     setup() {
