@@ -12,7 +12,7 @@ export function createComponentInstance(vnode) {
         emit: () => {},
     }
 
-    instance.emit = emit.bind(null, instance)
+    instance.emit = emit.bind(null, instance) as any
     return instance
 }
 
