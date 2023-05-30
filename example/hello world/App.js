@@ -7,6 +7,9 @@ export const App = {
             {
                 id: 'root',
                 class: ['red'],
+                onClick() {
+                    console.log('click')
+                }
             },
             // [h('p', {class: ['red']}, 'hi,'), h('p', {class: ['blue']},  'min vue')]
             'hi, ' + this.msg

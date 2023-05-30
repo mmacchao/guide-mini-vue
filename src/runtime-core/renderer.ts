@@ -34,7 +34,16 @@ function mountElement(vnode, container) {
 
     // handle props
     for(let key in vnode.props) {
-        el.setAttribute(key, vnode.props[key])
+        const val = vnode.props[key]
+        // handle event
+        const isOn = key => /^on[A-Z]/.test(key)
+        if(isOn(key)) {
+            const event = key.slice(2).toLowerCase()
+            el.addEventListener(event, val)
+        } else {
+            el.setAttribute(key, val)
+        }
+        
     }
 
     container.append(el)
