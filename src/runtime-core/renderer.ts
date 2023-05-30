@@ -1,28 +1,34 @@
 import { isObject } from "../reactivity/share/index"
 import { createComponentInstance, setupComponent } from "./component"
+import { ShapeFlags } from "./shapFlags"
 
 export function render(vnode, container) {
     patch(vnode, container)
 }
 
 export function patch(vnode, container) {
-    if (typeof vnode.type === 'string') {
+    if (vnode.shapFlag & ShapeFlags.ELEMENT) {
         processElement(vnode, container)
-    } else if (isObject(vnode.type)) {
+    } else if (vnode.shapFlag & ShapeFlags.STATEFUL_COMPONENT) {
         processComponent(vnode, container)
     }
 
 }
 
 function processElement(vnode, container) {
+   mountElement(vnode, container)
+
+}
+
+function mountElement(vnode, container) {
     const el = document.createElement(vnode.type)
 
     vnode.el = el
 
     // handle children
-    if(typeof vnode.children === 'string') {
+    if(vnode.shapFlag & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = vnode.children
-    } else if(Array.isArray(vnode.children)) {
+    } else if(vnode.shapFlag & ShapeFlags.ARRAY_CHILDREN) {
        patchChildren(vnode.children, el)
     }
 
@@ -32,7 +38,6 @@ function processElement(vnode, container) {
     }
 
     container.append(el)
-
 }
 
 function patchChildren(children, container) {
