@@ -1,4 +1,4 @@
-import { isObject } from "../share/index"
+import { hasOwn, isObject } from "../share/index"
 import { createComponentInstance, setupComponent } from "./component"
 import { ShapeFlags } from "./shapFlags"
 import { Fragment, Text } from "./vnode"
@@ -71,7 +71,7 @@ export function createRenderer(options) {
     // handle props
     if (isObject(vnode.props)) {
       for (let key in vnode.props) {
-        hostPatchProp(el, key, vnode.props[key])
+        hostPatchProp(el, key, null, vnode.props[key])
       }
     }
 
@@ -94,6 +94,25 @@ export function createRenderer(options) {
   }
 
   function patchElement(n1, n2, container) {
+    const el = n2.el = n1.el
+    patchProps(el, n1.props || {}, n2.props || {})
+  }
+
+  function patchProps(el, prevProps, newProps) {
+    for(const key in newProps) {
+      const prevProp = prevProps[key]
+      const nextProp = newProps[key]
+      if(nextProp !== prevProp) {
+        hostPatchProp(el, key, prevProp, nextProp)
+      }
+    }
+
+    for(const key in prevProps) {
+      if(!hasOwn(newProps, key)) {
+        hostPatchProp(el, key, prevProps[key], null)
+      }
+    }
+
 
   }
 
@@ -116,7 +135,7 @@ export function createRenderer(options) {
 
     effect(() => {
       if (!instance.isMounted) {
-        const subTree = instance.render.call(instance.proxy)
+        const subTree = instance.subTree = instance.render.call(instance.proxy)
 
         patch(null, subTree, container, instance)
 
