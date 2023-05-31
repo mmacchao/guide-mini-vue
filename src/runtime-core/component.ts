@@ -31,8 +31,10 @@ function setupStatefulComponent(instance) {
 
     const {setup} = Component
     if(setup) {
+        setCurrentInstance(instance)
         const setupResult = setup(shallowReadonly(instance.props), {emit: instance.emit})
         hanldeSetupResult(instance, setupResult)
+        setCurrentInstance(null)
     }
 }
 
@@ -47,6 +49,15 @@ function hanldeSetupResult(instance, setupResult: any) {
 
 function finishComponentSetup() {
     // throw new Error("Function not implemented.")
+}
+
+let currentInstance
+export function getCurrentInstance() {
+    return currentInstance
+}
+
+function setCurrentInstance(instance) {
+    currentInstance = instance
 }
 
 
