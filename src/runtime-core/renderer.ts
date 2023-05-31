@@ -4,22 +4,22 @@ import { ShapeFlags } from "./shapFlags"
 import { Fragment, Text } from "./vnode"
 
 export function render(vnode, container) {
-    patch(vnode, container)
+    patch(vnode, container, null)
 }
 
-export function patch(vnode, container) {
+export function patch(vnode, container, parentComponent) {
     switch (vnode.type) {
         case Fragment:
-            processFragment(vnode, container)
+            processFragment(vnode, container, parentComponent)
             break
         case Text:
             processText(vnode, container)
             break
         default:
             if (vnode.shapFlag & ShapeFlags.ELEMENT) {
-                processElement(vnode, container)
+                processElement(vnode, container, parentComponent)
             } else if (vnode.shapFlag & ShapeFlags.STATEFUL_COMPONENT) {
-                processComponent(vnode, container)
+                processComponent(vnode, container, parentComponent)
             }
     }
 
@@ -27,19 +27,19 @@ export function patch(vnode, container) {
 
 }
 
-function processElement(vnode, container) {
-    mountElement(vnode, container)
+function processElement(vnode, container, parentComponent) {
+    mountElement(vnode, container, parentComponent)
 }
 
-function processFragment(vnode, container) {
-    patchChildren(vnode.children, container)
+function processFragment(vnode, container, parentComponent) {
+    patchChildren(vnode.children, container, parentComponent)
 }
 function processText(vnode, container) {
     const el = vnode.el = document.createTextNode(vnode.children)
     container.append(el)
 }
 
-function mountElement(vnode, container) {
+function mountElement(vnode, container, parentComponent) {
     const el = vnode.el = document.createElement(vnode.type)
 
     vnode.el = el
@@ -48,7 +48,7 @@ function mountElement(vnode, container) {
     if (vnode.shapFlag & ShapeFlags.TEXT_CHILDREN) {
         el.textContent = vnode.children
     } else if (vnode.shapFlag & ShapeFlags.ARRAY_CHILDREN) {
-        patchChildren(vnode.children, el)
+        patchChildren(vnode.children, el, parentComponent)
     }
 
     // handle props
@@ -68,19 +68,19 @@ function mountElement(vnode, container) {
     container.append(el)
 }
 
-function patchChildren(children, container) {
+function patchChildren(children, container, parentComponent) {
     children.forEach(childVnode => {
-        patch(childVnode, container)
+        patch(childVnode, container, parentComponent)
     })
 }
 
-function processComponent(vnode: any, container) {
+function processComponent(vnode: any, container, parentComponent) {
 
-    mountComponent(vnode, container)
+    mountComponent(vnode, container, parentComponent)
 
 }
-function mountComponent(vnode, container) {
-    const instance = createComponentInstance(vnode)
+function mountComponent(vnode, container, parentComponent) {
+    const instance = createComponentInstance(vnode, parentComponent)
     setupComponent(instance)
     setupRenderEffect(instance, vnode, container)
 }
@@ -88,7 +88,7 @@ function mountComponent(vnode, container) {
 function setupRenderEffect(instance, vnode, container) {
     const subTree = instance.render.call(instance.proxy)
 
-    patch(subTree, container)
+    patch(subTree, container, instance)
 
     // 组件的el要挂载子元素的根el
     vnode.el = subTree.el
