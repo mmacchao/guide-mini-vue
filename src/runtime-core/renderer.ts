@@ -8,9 +8,9 @@ export function createRenderer(options) {
 
   // const options = {}
   const {
-    createElement,
-    patchProps,
-    insert,
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp,
+    insert: hostInsert,
   } = options
 
   function render(vnode, container) {
@@ -51,7 +51,7 @@ export function createRenderer(options) {
 
   function mountElement(vnode, container, parentComponent) {
     // const el = vnode.el = document.createElement(vnode.type)
-    const el = vnode.el = createElement(vnode.type)
+    const el = vnode.el = hostCreateElement(vnode.type)
 
     vnode.el = el
 
@@ -63,7 +63,13 @@ export function createRenderer(options) {
     }
 
     // handle props
-    patchProps(el, vnode.props)
+    if(isObject(vnode.props)) {
+      for(let key in vnode.props) {
+        hostPatchProp(el, key, vnode.props[key])
+      }
+    }
+    
+    
     // for (let key in vnode.props) {
     //     const val = vnode.props[key]
     //     // handle event
@@ -77,7 +83,7 @@ export function createRenderer(options) {
     //
     // }
 
-    insert(el, container)
+    hostInsert(el, container)
     // container.append(el)
   }
 
