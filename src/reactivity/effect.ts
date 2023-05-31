@@ -56,7 +56,10 @@ export function isTracking() {
 export function trigger(target, key) {
     const depsMap = targetMap.get(target)
     const dep = depsMap.get(key)
-    triggerEffect(dep)
+    if(dep?.size) {
+        triggerEffect(dep)
+    }
+    
 }
 
 export function triggerEffect(dep) {
