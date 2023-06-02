@@ -180,10 +180,10 @@ export function createRenderer(options) {
         const prevChild = c1[i]
 
         let newIndex 
-        if(prevChild.key !== null) {
+        if(prevChild.key != null) {
           newIndex = keyToNewIndexMap.get(prevChild.key)
         } else {
-          for(let j = s2; j < e2; j++) {
+          for(let j = s2; j <= e2; j++) {
             if(isSameVnodeType(prevChild, c2[j])) {
               newIndex = j
               break
