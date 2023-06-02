@@ -5,6 +5,7 @@ import { Fragment, Text } from "./vnode"
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 import { shouldUpdateComponent } from "./updateComponentUtil";
+import { queueJob } from "./scheduler";
 
 export function createRenderer(options) {
 
@@ -398,6 +399,7 @@ export function createRenderer(options) {
           next.el = vnode.el
           updateComponentPreRender(instance, next)
         }
+        console.log('update')
 
 
         const subTree = instance.render.call(instance.proxy)
@@ -407,6 +409,10 @@ export function createRenderer(options) {
         patch(prevSubTree, subTree, container, instance, null)
       }
 
+    }, {
+      scheduler: () => {
+        queueJob(instance.update)
+      }
     })
 
   }
