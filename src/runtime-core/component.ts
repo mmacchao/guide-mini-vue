@@ -8,6 +8,7 @@ import { initSlots } from "./componentSlots"
 export function createComponentInstance(vnode, parentComponent) {
     const instance = {
         vnode,
+        next: null,
         type: vnode.type,
         setupState: {},
         props: null,
@@ -17,7 +18,9 @@ export function createComponentInstance(vnode, parentComponent) {
         provides: (parentComponent && parentComponent.provides) ? parentComponent.provides : {},
         isMounted: false,
         subTree: {},
+    
     }
+    vnode.instance = instance
 
     instance.emit = emit.bind(null, instance) as any
     return instance

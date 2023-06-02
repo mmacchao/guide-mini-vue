@@ -4,6 +4,7 @@ import { ShapeFlags } from "./shapFlags"
 import { Fragment, Text } from "./vnode"
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
+import { shouldUpdateComponent } from "./updateComponentUtil";
 
 export function createRenderer(options) {
 
@@ -167,30 +168,30 @@ export function createRenderer(options) {
       const toBePatched = e2 - s2 + 1
       const keyToNewIndexMap = new Map()
       const newIndexToOldIndexMap = new Array(toBePatched)
-      for(let i = 0; i < toBePatched; i++) {
+      for (let i = 0; i < toBePatched; i++) {
         newIndexToOldIndexMap[i] = 0
       }
 
-      for(let i = s2; i <= e2; i++) {
+      for (let i = s2; i <= e2; i++) {
         const nextChild = c2[i]
         keyToNewIndexMap.set(nextChild.key, i)
       }
 
-      for(let i = s1; i <= e1; i++) {
+      for (let i = s1; i <= e1; i++) {
         const prevChild = c1[i]
 
-        let newIndex 
-        if(prevChild.key != null) {
+        let newIndex
+        if (prevChild.key != null) {
           newIndex = keyToNewIndexMap.get(prevChild.key)
         } else {
-          for(let j = s2; j <= e2; j++) {
-            if(isSameVnodeType(prevChild, c2[j])) {
+          for (let j = s2; j <= e2; j++) {
+            if (isSameVnodeType(prevChild, c2[j])) {
               newIndex = j
               break
             }
           }
         }
-        if(newIndex === undefined) {
+        if (newIndex === undefined) {
           hostRemove(prevChild.el)
         } else {
           // i + 1来规避0值，0值的意义表示未匹配上
@@ -198,12 +199,12 @@ export function createRenderer(options) {
           patch(prevChild, c2[newIndex], container, parentComponent, null)
         }
       }
-      
+
       // 最长子序列算法，算出哪些节点不需要移动
       const increasingNewIndexSequence = getSequence(newIndexToOldIndexMap)
       let j = increasingNewIndexSequence.length - 1
-      for(let i = toBePatched - 1; i >= 0; i--) {
-        if( i !== increasingNewIndexSequence[j]) {
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        if (i !== increasingNewIndexSequence[j]) {
           // console.log('dom移动位置')
           // abcdef
           // dbcagef
@@ -217,19 +218,19 @@ export function createRenderer(options) {
           // i = 0; j = -1; seq[j] = undefined; 移动dom到b的前面，b的Index=i+s2+1
           const nextIndex = i + s2
           const nextChild = c2[nextIndex]
-          const anchor = nextIndex < c2.length - 1 ? c2[nextIndex+1].el : null
-          if(newIndexToOldIndexMap[i] === 0) {
+          const anchor = nextIndex < c2.length - 1 ? c2[nextIndex + 1].el : null
+          if (newIndexToOldIndexMap[i] === 0) {
             // 新增
             patch(null, nextChild, container, parentComponent, anchor);
           } else {
             hostInsert(nextChild.el, container, anchor)
           }
-          
+
         } else {
           j--
         }
       }
-      
+
       function getSequence(arr: number[]): number[] {
         const p = arr.slice();
         const result = [0];
@@ -354,7 +355,25 @@ export function createRenderer(options) {
   }
 
   function processComponent(n1, n2: any, container, parentComponent) {
-    mountComponent(n2, container, parentComponent)
+    if (!n1) {
+      mountComponent(n2, container, parentComponent)
+    } else {
+      if (shouldUpdateComponent(n1, n2)) {
+        updateComponent(n1, n2, container, parentComponent)
+      }
+      else {
+        const instance = n1.instance
+        instance.vnode = n2
+        n2.instance = instance
+      }
+    }
+
+  }
+
+  function updateComponent(n1, n2, container, parentComponent) {
+    const instance = n2.instance = n1.instance
+    instance.next = n2
+    instance.update()
   }
   function mountComponent(n2, container, parentComponent) {
     const instance = createComponentInstance(n2, parentComponent)
@@ -364,7 +383,7 @@ export function createRenderer(options) {
 
   function setupRenderEffect(instance, vnode, container) {
 
-    effect(() => {
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         const subTree = instance.subTree = instance.render.call(instance.proxy)
 
@@ -374,10 +393,17 @@ export function createRenderer(options) {
         vnode.el = subTree.el
         instance.isMounted = true
       } else {
+        const { next, vnode } = instance
+        if (next) {
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
+
+
         const subTree = instance.render.call(instance.proxy)
         const prevSubTree = instance.subTree
         instance.subTree = subTree
-        subTree.el = prevSubTree
+        subTree.el = prevSubTree.el
         patch(prevSubTree, subTree, container, instance, null)
       }
 
@@ -385,8 +411,15 @@ export function createRenderer(options) {
 
   }
 
+  function updateComponentPreRender(instance, nextVnode) {
+    instance.vnode = nextVnode
+    instance.props = nextVnode.props
+    instance.next = null
+  }
+
   return {
     createApp: createAppAPI(render)
   }
 }
+
 
