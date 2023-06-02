@@ -17,6 +17,11 @@ function parseChildren(context) {
         }
 
     }
+
+    if(!node) {
+        node = parseText(context)
+    }
+
     nodes.push(node)
 
     return nodes
@@ -34,7 +39,8 @@ function parseTag(context, type) {
     const s = context.source
     const match: any = /^<\/?([a-z]*)/i.exec(s)
     const tag = match[1]
-    context.source = context.source.slice(match[0].length+1)
+    // context.source = context.source.slice(match[0].length+1)
+    advancedBy(context, match[0].length+1)
     if(type === TagTypes.END) return
     return {
         type: NodeTypes.ELEMENT,
@@ -47,8 +53,8 @@ function parseInterpolation(context) {
     const closeDelimiter = '}}'
     const closeIndex = context.source.indexOf(closeDelimiter, openDelimiter.length)
     const rawContentLength = closeIndex - openDelimiter.length
-    context.source = context.source.slice(openDelimiter.length)
-    const content = context.source.slice(0, rawContentLength)
+    advancedBy(context, openDelimiter.length)
+    const content = parseTextData(context, rawContentLength)
 
     return {
         type: NodeTypes.INTERPOLATION,
@@ -70,3 +76,23 @@ function createParseContext(content) {
         source: content
     }
 }
+
+function parseText(context: any) {
+    const content = parseTextData(context, context.source.length)
+
+    return {
+        type: NodeTypes.TEXT,
+        content: 'some text',
+    }
+}
+
+function parseTextData(context, length) {
+    const content = context.source.slice(0, length)
+    advancedBy(context, content.length)
+    return content
+}
+
+function advancedBy(context: any, length: any) {
+    context.source = context.source.slice(length)
+}
+
