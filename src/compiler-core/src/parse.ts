@@ -7,9 +7,39 @@ export function baseParse(content) {
 
 function parseChildren(context) {
     const nodes: any = []
-    const node = parseInterpolation(context)
+    let node
+    if (context.source.startsWith('{{')) {
+        node = parseInterpolation(context)
+        nodes.push(node)
+    } else if (context.source.startsWith('<')) {
+        if (/[a-z]/i.test(context.source[1])) {
+            node = parseElement(context)
+        }
+
+    }
     nodes.push(node)
+
     return nodes
+}
+const enum TagTypes {
+    START,
+    END
+}
+function parseElement(context) {
+   const node = parseTag(context, TagTypes.START)
+   parseTag(context, TagTypes.END)
+   return node
+}
+function parseTag(context, type) {
+    const s = context.source
+    const match: any = /^<\/?([a-z]*)/i.exec(s)
+    const tag = match[1]
+    context.source = context.source.slice(match[0].length+1)
+    if(type === TagTypes.END) return
+    return {
+        type: NodeTypes.ELEMENT,
+        tag
+    }
 }
 
 function parseInterpolation(context) {
@@ -24,7 +54,7 @@ function parseInterpolation(context) {
         type: NodeTypes.INTERPOLATION,
         content: {
             type: NodeTypes.SIMPLE_EXPRESSION,
-            content: content,
+            content: content.trim(),
         }
     }
 }
