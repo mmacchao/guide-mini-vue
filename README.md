@@ -17,5 +17,7 @@ yarn add rollup --dev
 yarn add @rollup/plugin-typescript --dev
 // 安装tslib
 
+yarn test -u // 更新快照
+
 QA：
     jest插件不生效 -> 删除重装
