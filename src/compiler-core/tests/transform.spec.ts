@@ -3,7 +3,7 @@ import { baseParse } from "../src/parse"
 import { transform } from "../src/transform"
 
 describe('transform', () => {
-    it.only('happy path', () => {
+    it('happy path', () => {
         const content = '<div>hi:</div>'
         const plugin = node => {
             if(node.type === NodeTypes.TEXT) {

@@ -2,8 +2,9 @@ import { NodeTypes } from "../src/ast"
 import { generate } from "../src/codegen"
 import { baseParse } from "../src/parse"
 import { transform } from "../src/transform"
-import { transfromElement } from "../src/transformElement"
-import { transformExpression } from "../src/transformExpression"
+import { transfromElement } from "../src/transforms/transformElement"
+import { transformExpression } from "../src/transforms/transformExpression"
+import { transfromText } from "../src/transforms/transformText"
 
 describe('codegen', () => {
     it('string', () => {
@@ -30,6 +31,16 @@ describe('codegen', () => {
 
         const {code} = generate(transform(ast, {
             nodeTransforms: [transfromElement]
+        }))
+        expect(code).toMatchSnapshot()
+    })
+
+    it('联合类型', () => {
+        const content = '<div>hi: {{message}}</div>'
+        const ast = baseParse(content)
+
+        const {code} = generate(transform(ast, {
+            nodeTransforms: [transformExpression, transfromElement, transfromText]
         }))
         expect(code).toMatchSnapshot()
     })
