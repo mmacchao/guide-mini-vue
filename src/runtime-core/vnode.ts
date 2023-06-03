@@ -1,5 +1,8 @@
 import { isObject } from "../share/index"
 import { ShapeFlags } from "./shapFlags"
+export {
+    createVNode as createElementVnode
+}
 
 export function createVNode(type, props?, children?) {
     const vnode = {

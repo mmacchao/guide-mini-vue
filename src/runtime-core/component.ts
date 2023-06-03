@@ -50,13 +50,16 @@ function hanldeSetupResult(instance, setupResult: any) {
     if(typeof setupResult === 'object') {
         instance.setupState = proxyRef(setupResult)
     }
-    instance.render = instance.type.render
-
-    finishComponentSetup()
+    finishComponentSetup(instance)
 }
 
-function finishComponentSetup() {
-    // throw new Error("Function not implemented.")
+function finishComponentSetup(instance) {
+    const Component = instance.type
+    if(Component.render) {
+        instance.render = Component.render
+    } else if(Component.template && compiler) {
+        instance.render = compiler(Component.template)
+    }  
 }
 
 let currentInstance
@@ -66,6 +69,11 @@ export function getCurrentInstance() {
 
 function setCurrentInstance(instance) {
     currentInstance = instance
+}
+
+let compiler
+export function registerRuntimeCompiler(_compiler) {
+    compiler = _compiler
 }
 
 

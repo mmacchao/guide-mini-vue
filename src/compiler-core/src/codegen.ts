@@ -71,7 +71,9 @@ function genNodeList(nodes, context) {
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
         if (isString(node)) {
-            push(`${node}`)
+            push(`"${node}"`)
+        } else if(node === null) {
+            push(node + '')
         } else {
             genCode(node[0], context)
         }
@@ -119,6 +121,6 @@ function genCompundExpression(node: any, context: any) {
 }
 
 function getNullable(args): any {
-    return args.map(arg => arg || 'null')
+    return args.map(arg => arg || null)
 }
 

@@ -386,7 +386,7 @@ export function createRenderer(options) {
 
     instance.update = effect(() => {
       if (!instance.isMounted) {
-        const subTree = instance.subTree = instance.render.call(instance.proxy)
+        const subTree = instance.subTree = instance.render.call(instance.proxy, instance.proxy)
 
         patch(null, subTree, container, instance, null)
 
@@ -402,7 +402,7 @@ export function createRenderer(options) {
         console.log('update')
 
 
-        const subTree = instance.render.call(instance.proxy)
+        const subTree = instance.render.call(instance.proxy, instance.proxy)
         const prevSubTree = instance.subTree
         instance.subTree = subTree
         subTree.el = prevSubTree.el
