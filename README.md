@@ -1,5 +1,13 @@
 ## mini-vue
 本项目主要是学习时跟随视频进行的一些code，学习资源为：[小崔的Vue3源码实战课](https://learn.cuixueshe.com/p/t_pc/goods_pc_detail/goods_detail/p_61fb595ce4b0beaee4275e1e?product_id=p_61fb595ce4b0beaee4275e1e)
+### 代码调试
+```cookie
+yarn install
+
+yarn build --watch
+
+然后用浏览器打开example目录里面的html文件即可
+```
 ### 项目从零开始的一些配置项
 ```
 yarn init -y // 初始化项目
@@ -27,4 +35,5 @@ yarn test -u // 更新快照
 
 QA：
     jest插件不生效 -> 删除重装
-```
+
+
